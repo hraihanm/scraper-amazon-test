@@ -1,5 +1,5 @@
 seeder:
- - file: ./seeder/seeder.rb
+ file: ./seeder/seeder.rb
 parsers:
  - file: ./parsers/products.rb
    page_type: products
