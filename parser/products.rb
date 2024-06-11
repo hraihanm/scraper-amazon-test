@@ -1,39 +1,43 @@
 nokogiri = Nokogiri.HTML(content)
 
-# initialize an empty hash
+# Initialize an empty hash
 product = {}
 
-#save the url
+# Save the url
 product['url'] = page['vars']['url']
 
-#save the asin
+# Save the ASIN
 product['asin'] = page['vars']['asin']
 
-#extract title
+# Extract title
 product['title'] = nokogiri.at_css('#productTitle').text.strip
 
-#extract seller/author
+# Extract seller/author
 seller_node = nokogiri.at_css('a#bylineInfo')
 if seller_node
-  product['seller'] = seller_node.text.strip
+  product['seller'] = seller_node.text.strip.gsub("Visit the ", "")
 else
-  product['author'] = nokogiri.css('a.contributorNameID').text.strip
+  product['author'] = nokogiri.css('span.author a.a-link-normal').text.strip
+  # product['author'] = nokogiri.css('a.contributorNameID').text.strip
 end
 
-#extract number of reviews
+
+
+# Extract number of reviews
 reviews_node = nokogiri.at_css('span#acrCustomerReviewText')
 reviews_count = reviews_node ? reviews_node.text.strip.split(' ').first.gsub(',','') : nil
 product['reviews_count'] = reviews_count =~ /^[0-9]*$/ ? reviews_count.to_i : 0
 
-#extract rating
+# Extract rating
 rating_node = nokogiri.at_css('#averageCustomerReviews span.a-icon-alt')
 stars_num = rating_node ? rating_node.text.strip.split(' ').first : nil
 product['rating'] = stars_num =~ /^[0-9.]*$/ ? stars_num.to_f : nil
 
-#extract price
-product['price'] = nokogiri.at_css('#price_inside_buybox', '#priceblock_ourprice', '#priceblock_dealprice', '.offer-price', '#priceblock_snsprice_Based').text.strip.gsub(/[\$,]/,'').to_f
+# extract price
+product['price'] = nokogiri.at_css('.priceToPay', '.reinventHeaderPrice', '#size_name_0_price').text.strip.gsub(/[\$,]/,'').to_f
+# product['price'] = nokogiri.at_css('#price_inside_buybox', '#priceblock_ourprice', '#priceblock_dealprice', '.offer-price', '#priceblock_snsprice_Based').text.strip.gsub(/[\$,]/,'').to_f
 
-#extract availability
+# Extract availability
 availability_node = nokogiri.at_css('#availability')
 if availability_node
   product['available'] = availability_node.text.strip == 'In Stock.' ? true : false
@@ -41,17 +45,30 @@ else
   product['available'] = nil
 end
 
-#extract product description
+# Extract product description
 description = ''
-nokogiri.css('#feature-bullets li').each do |li|
-  unless li['id'] || (li['class'] && li['class'] != 'showHiddenFeatureBullets')
-    description += li.text.strip + ' '
+feature_bullets = nokogiri.css('#feature-bullets li')
+book_desc = nokogiri.css('#bookDescription_feature_div')
+
+if feature_bullets.empty? == false
+  p 'it has some features'
+  feature_bullets.each do |li|
+    # unless li['id'] || (li['class'] && li['class'] != 'showHiddenFeatureBullets')
+    #   description += li.text.strip + ' '
+    # end
+    description += li.text.strip + "\n"
+  end
+elsif book_desc.empty? == false
+  p 'it is a book'
+  book_desc.each do |para|
+    description += para.text.strip + "\n"
   end
 end
-product['description'] = description.strip
+
+product['description'] = description
 
 #extract image
-product['image'] = nokogiri.at_css('#main-image-container img')['src']
+product['image'] = nokogiri.at_css('#imgTagWrapperId img')['src']
 
 # specify the collection where this record will be stored
 product['_collection'] = "products"

@@ -1,5 +1,8 @@
 CSV.foreach("./seeder/asins.csv", headers: true) do |row|
     url = "https://www.amazon.com/o/ASIN/#{row['ASIN']}"
+    ### Example: URL ###
+    # ASIN: 1476753830
+    # url: "https://www.amazon.com/o/ASIN/1476753830"
     pages << {
       page_type: "products",
       method: "GET",

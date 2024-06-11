@@ -1,7 +1,8 @@
 seeder:
- file: ./seeder/seeder.rb
+ - file: ./seeder/seeder.rb
 parsers:
- - page_type: products
-   file: ./parsers/products.rb
+ - file: ./parsers/products.rb
+   page_type: products
+   disabled: false
 exporters:
  - file: ./exporters/products_json.yaml 
