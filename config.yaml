@@ -1,7 +1,7 @@
 seeder:
  file: ./seeder/seeder.rb
 parsers:
- - file: ./parsers/products.rb
+ - file: ./parsers/product.rb
    page_type: products
    disabled: false
 exporters:
